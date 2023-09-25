@@ -1,0 +1,93 @@
+{% extends 'requestmanager/layout.html' %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% block content %}
+    <div id="table">
+        <h1 style="text-align: center; font-weight: bold; font-size: larger;">Lista de Pedidos</h1>
+        <br>
+        <div v-if="toggle">
+        {% if messages %}
+            <ul class="messages box has-text-centered"
+                style="width: fit-content; margin: auto; margin-top: 5px; margin-bottom: 5px">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                            <span style="color: green;">{{ message }}</span>
+                        {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                            <span style="color: red;">{{ message }}</span>
+                        {% endif %}
+                        <b-button rounded type="s-info is-light" size="is-small" @click="checkToggle"><span
+                                class="icon"><i
+                                class="fa fa-times" aria-hidden="true"></i></span></b-button>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+        <br>
+        <div class="columns">
+            <div class="column is-one-quarter">
+                {% if filter %}
+                    <form action="" method="get" class="form form-inline">
+                        <div style="margin-top: 13px">
+                            <span style="font-weight: bolder; font-size: large;">Filtros</span>
+                            <table class="table is-narrow">
+                                <tr>
+                                    <td>Estado:</td>
+                                    <td>&Tab;</td>
+                                    <td>{{ filter.form.estado }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Tipo:</td>
+                                    <td>&Tab;</td>
+                                    <td>{{ filter.form.tipo }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Data Alvo:</td>
+                                    <td>&Tab;</td>
+                                    <td>{{ filter.form.DataAlvo }}</td>
+                                </tr>
+                                <tr>
+                                    <td>A partir de:</td>
+                                    <td>&Tab;</td>
+                                    <td>{{ filter.form.DataAlvo__gt }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Antes de:</td>
+                                    <td>&Tab;</td>
+                                    <td>{{ filter.form.DataAlvo__lt }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <br>
+                        <input class="button is-primary" type="submit" value="Aplicar Filtros" id="filter">
+                    </form>
+                {% endif %}
+            </div>
+            <div class="column box">{% render_table table %}</div>
+        </div>
+    </div>
+
+    <script>
+        var app = new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#table",
+            data() {
+                return {
+                    toggle: true,
+                }
+            },
+            async created() {
+                console.log(this.toggle)
+            },
+            methods: {
+                checkToggle() {
+                    this.toggle = false
+                    console.log(this.toggle)
+                    //this.indexes.push(this.n)
+                },
+            },
+        })
+
+    </script>
+{% endblock content %}

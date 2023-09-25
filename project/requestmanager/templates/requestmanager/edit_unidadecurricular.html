@@ -1,0 +1,186 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+    <div id="table">
+        <form class="has-text-centered" method="post" id="form">
+            {% csrf_token %}
+            <h1 style="text-align: center; font-weight: bold; font-size: larger;">Editar Pedido de Unidade
+                Curricular</h1>
+            <label class="label">Assunto</label>
+            <input name="assunto" v-model="pedido_principal.assunto" class="block input" required>
+            {#        {{ form.assunto }}#}
+            <label class="label">Descrição</label>
+            <textarea name="descricao" v-model="pedido_principal.descricao" class="block textarea"
+                      required> [[pedido_principal.descricao]] </textarea>
+            {#        {{ form.descricao }}#}
+            <div class="block">
+                <label class="label">Data Alvo</label>
+                <input type="date" name="data" v-model="pedido_principal.dataalvo" min="{{ min_date }}" max="{{ max_date }}" required>
+            </div>
+
+            <div id="table" class="block columns is-centered">
+                <div class="column">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width:10%">Ação</th>
+                            <th style="width:10%">Turma</th>
+                            <th style="width:10%">Unidade Curricular</th>
+                            <th style="width:10%">Descrição</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(value, i) in pedidos" :key="i">
+                            <td>
+                                <div class="select">
+                                    <select :name="'acao' + i" v-model="value.acao" required>
+                                        <template v-for="(option, index) in acao" :key="index">
+                                            <option v-if="value.id != '' && option.id == value.acao" selected
+                                                    :value=option.id>
+                                                [[option.nome]]
+                                            </option>
+                                            <option v-else :value=option.id>
+                                                [[option.nome]]
+                                            </option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="select">
+                                    <select :name="'turma' + i" v-model="value.tipoturmaid" required>
+                                        <template v-for="(option, index) in turma" :key="index">
+                                            <option v-if="value.id != '' && option.id == value.tipoturmaid"
+                                                    selected :value=option.id>
+                                                [[option.nome]]
+                                            </option>
+                                            <option v-else :value=option.id>
+                                                [[option.nome]]
+                                            </option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="select">
+                                    <select :name="'unidade' + i" v-model="value.unidadecurricularid" required>
+                                        <template v-for="(option, index) in unidade" :key="index">
+                                            <option v-if="option.nome == unidadeval[i-1]" selected :value=option.id> [[
+                                                option.nome ]]
+                                            </option>
+                                            <option v-else :value=option.id> [[ option.nome ]]</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                <textarea v-if="value.id != ''" :name="'assunto' + i"
+                                          v-model="value.assunto" required></textarea>
+                                    <textarea v-else v-model="value.assunto" :name="'assunto' + i" required></textarea>
+                                </div>
+                            </td>
+
+                            <td>
+                                <b-button rounded type="s-info is-light" size="is-small" @click="removeLine(i)">
+                <span class="icon">
+                  <i class="fas fa-lg fa-solid fa-trash"></i>
+                </span>
+                                </b-button>
+                            </td>
+
+                        </tr>
+
+                        <td>
+                            <div style="float: left;">
+                                <input type="button" class="button" style=" margin-right: 10px; padding: 5px"
+                                       value="Adicionar Linha"
+                                       @click="addLine()">
+                            </div>
+                        </td>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="block"><input class="button is-primary" type="submit" value="Submeter">
+                <input class="button is-primary" type=button value="Voltar" onClick="javascript:history.go(-1);">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        var app = new Vue({
+
+            delimiters: ["[[", "]]"],
+            el: '#table',
+            data() {
+                return {
+                    acao: [],
+                    turma: [],
+                    pedidos: [],
+                    unidade: [],
+                    unidadeval: [],
+                    unidade_nome: [],
+                    idsuc: [],
+                    pedido_principal: [],
+                    n: 1
+                }
+            },
+            async created() {
+                await this.fetchData();
+                this.pedidos.forEach(p => this.turmas.push(p.tipoturmaid));
+                this.getID()
+                this.n = this.pedidos.length
+                console.log(this.pedidos)
+            },
+            methods: {
+                async fetchData() {
+                    pathname = window.location.pathname.split('/')
+                    id = pathname[pathname.length - 1]
+                    this.unidade = await axios.get('http://127.0.0.1:8000/api/uc_unidadecurricular/' + 3)
+                    this.unidade = this.unidade.data
+                    this.acao = await axios.get('http://127.0.0.1:8000/api/acao')
+                    this.acao = this.acao.data
+                    this.pedidos = await axios.get('http://127.0.0.1:8000/api/pedido_uc/' + id)
+                    this.pedidos = this.pedidos.data
+                    this.pedido_principal = await axios.get('http://127.0.0.1:8000/api/pedido/' + id)
+                    this.pedido_principal = this.pedido_principal.data
+                    this.turma = await axios.get('http://127.0.0.1:8000/api/tipoturma/')
+                    this.turma = this.turma.data
+                },
+                getID() {
+                    f = 0
+                    for (j = 0; j < this.pedidos.length; j++) {
+                        for (i = 0; i < this.unidade.length; i++) {
+                            if (this.pedidos[j].unidadecurricularid == this.unidade[i].id) {
+                                this.unidadeval.push(this.unidade[i].nome)
+                            }
+                        }
+                    }
+                },
+                addLine() {
+                    this.n++
+                    this.pedidos.push({
+                        id: '',
+                        acao: '',
+                        tipoturmaid: '',
+                        unidadecurricularid: '',
+                        assunto: ''
+                    })
+                    //this.indexes.push(this.n)
+                },
+                removeLine(i) {
+                    //this.pedidos = this.pedidos.filter((x) => x != i);
+                    this.$delete(this.pedidos, i)
+                    this.n--;
+                },
+            },
+        })
+    </script>
+
+{% endblock content %}

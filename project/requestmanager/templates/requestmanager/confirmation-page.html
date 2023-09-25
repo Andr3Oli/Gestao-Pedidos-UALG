@@ -1,0 +1,11 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% block content %}
+<p style="text-align:center"><strong>{{ confirm_question }}</strong></p><br>
+<div class="center" style="margin:auto; margin-right: 50%; margin-left: 50%">
+  <form action="" method = "POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input class="button is-primary" type="submit" value="Sim">
+        <a href="{%url 'requestmanager:app_render'%}" class="button is-primary">Não</a>
+  </form>
+</div>
+{% endblock content %}

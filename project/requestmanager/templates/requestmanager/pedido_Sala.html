@@ -1,0 +1,232 @@
+{% extends 'main/app.html' %}
+{% load static %}
+
+{% block title %}- Página Inicial{% endblock title %}
+
+{% block content %}
+  <form class="has-text-centered" method="post" id="form">
+      {% csrf_token %}
+      <label class="label">Assunto</label>
+      {{form.assunto}}
+      <label class="label">Descrição</label>
+      {{form.content}}
+      <div class="block" >
+        <label class="label">Data Alvo</label>
+        {{form.target_date}}
+      </div>
+
+      <div id="table" class="block columns is-centered">
+        <div class="column">
+          <table class="table">
+            <thead>
+                <tr>
+                  <th style="width:10%">Ação</th>
+                  <th style="width:10%">Tipo</th>
+                  <th style="width:10%">Edificio</th>
+                  <th style="width:10%">Sala</th>
+                  <th style="width:10%">Lotação</th>
+                  <th style="width:50%">Data Alvo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="i in n" :key="i">
+
+                  <td><div class="select">
+                    <select :name="'acao' + i" @change="changeAcao(event.target.value, i-1)">
+                      <option v-for="(option, index) in acoes" :key="index" :selected="initialSpecs[i-1] && option === initialSpecs[i-1].acao" :value=option> [[ option ]] </option>
+                    </select></div></td>
+
+                  <td>
+                    <div class="select" v-if="selectedType.length > 0">
+                      <select :name="'selectedType' + i" @change="buildings(event.target.value, i-1)">
+                        <option v-for="(option, index) in selectedType" :key="index" :value="option">[[ option ]]</option>
+                      </select>
+                    </div>
+                  </td>
+                  
+                  <td>
+                    <div class="select">
+                      <select :name="'selectedBuilding' + i" @change="rooms(event.target.value, i-1)">
+                        <option v-for="(option, index) in selectedBuilding" :key="index" :value="option">[[ option ]]</option>
+                      </select>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="select">
+                      <select :name="'selectedRoom' + i" @change="lotation_func(event.target.value, i-1)">
+                        <option v-for="(option, index) in selectedRoom" :key="index" :value="option">[[ option ]]</option>
+                      </select>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="control is-clearfix">
+                      <input name="'lotation' + i" class="input" id="lotation" v-model="lotation" style="" type="text" maxlength="255" disabled="">
+                    </div>
+                  </td>
+
+                  <td>
+                    <div>
+                      <label for="date" style="font-size: 14px;">Date:</label>
+                      <input type="date" v-model="selectedDate" style="font-size: 12px;" id="date" name="'date' + i" required>
+                      
+                      <label for="time" style="font-size: 14px;">Start Time:</label>
+                      <input type="time" v-model="startTime" style="font-size: 12px;" id="time" name="'time' + i" required>
+                      <label for="time-end" style="font-size: 14px;">End Time:</label>
+                      <input type="time" v-model="endTime" style="font-size: 12px;" id="time-end" name="'time-end' + i" required>
+                    </div>
+                  </td>
+
+                  <td>
+                    <b-button
+                    rounded
+                    type="s-info is-light"
+                    size="is-small"
+                    @click="removeLine(i)"
+                    > 
+                    <span class="icon">
+                        <i class="fas fa-lg fa-solid fa-trash"></i>
+                    </span>
+                    </b-button>
+                  </td>
+                  
+                </tr>
+                
+                <td>
+                  <div style="float: left;">
+                    <input type="button" class="button" style=" margin-right: 10px; padding: 5px" value="Adicionar Linha" @click="addLine()">
+                  </div>
+                </td>
+
+              </tbody>
+            </table>
+        </div>
+      </div>
+
+      <div class="block"><input class="button is-primary" type="submit" value="Submit"></div>
+  </form>
+
+{% if msg %}
+      <div  style="margin-left:30%;margin-right:30%; margin-top:0%">
+        <div style="margin-top:2%;text-align: center;position:center;">
+        <article class="message is-danger">
+            <div class="message-body">
+            <p style="text-align: center;">
+                {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <p style="color: #ff0000; text-align:center">{{error}}</p>
+                {% endfor %}
+                {% else %} 
+
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p style="color: #ff0000;">{{ error }}</p>
+            {% endfor %}
+        {% endfor %} 
+            {%endif%}
+
+
+            </p>
+            </div>
+        </article>  
+      </div>
+    </div>
+{% endif %} 
+
+<script>
+
+  var initialSpecs = [
+    {% for spec in initialSpecs %}
+      {
+        acao: "{{spec.acao}}",
+        tipo: "{{spec.tipo}}",
+        edificio: "{{spec.edificio}}",
+        sala: "{{spec.sala}}",
+        desc: "{{spec.desc}}"
+      },
+    {% endfor %}
+  ]
+
+  var app = new Vue({
+    
+    delimiters: ["[[", "]]"],
+    el: '#table',
+    data() {
+      return{
+        initialSpecs: initialSpecs,
+        acoes: [],
+        data: [],
+        indexes: [],
+        selectedType: '',
+        selectedBuilding: '',
+        selectedRoom: '',
+        lotation: '',
+        selectedDate: '',
+        startTime: '',
+        endTime: '',
+        n: {{n}}
+      }
+    },
+    created() {
+      console.log("heu")
+      this.fetchData();
+    },
+    methods: {
+      async fetchData() {
+        this.data = (await axios.get('http://127.0.0.1:8000/api/options_Sala')).data;
+        this.data = JSON.parse(this.data);
+        this.data = this.data.items;
+        console.log(this.data)
+        this.acoes = ['Criar', 'Apagar', 'Alterar'];  
+        this.types();      
+        {% comment %} console.log(this.selectedType) {% endcomment %}
+      },
+      types() {
+        let items = this.data.map((item) => item.tipo);
+        this.selectedType = items.filter((item, index) => items.indexOf(item) === index);
+        {% comment %} console.log(this.selectedType)
+        console.log(this.selectedType.length) {% endcomment %}
+      },
+      buildings(type, line) {
+        {% comment %} console.log(this.selectedType[line].toString()) {% endcomment %}
+        let filtered = this.data.map((item) => {
+          if (item.tipo === type.toString()) {
+            return item.edificio;
+          }
+          });
+        {% comment %} console.log(filtered) {% endcomment %}
+        this.selectedBuilding = filtered.filter((item, index) => filtered.indexOf(item) === index);
+      },
+      rooms(building, line) {
+        let filtered = this.data.map((item) => {
+          if (item.edificio === building.toString()) {
+            return item.sala;
+          }
+          });
+        this.selectedRoom = filtered.filter((item, index) => filtered.indexOf(item) === index);
+      },
+      lotation_func(room, line) {
+        let filtered = this.data.filter((item) => item.sala === room.toString());
+        console.log(filtered)
+        if (filtered.length > 0) {
+          this.lotation = filtered[0].lotacao;
+          {% comment %} console.log(this.lotation) {% endcomment %}
+        } else {
+          this.lotation = "";
+        } 
+      },
+      addLine() {
+        this.n++
+        this.indexes.push(this.n)
+      },
+      removeLine(i){     
+        this.indexes = this.indexes.filter((x) => x != i);
+        this.n--;       
+      },
+
+    },
+  })
+</script>
+
+{% endblock content%}

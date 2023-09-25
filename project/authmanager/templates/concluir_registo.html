@@ -1,0 +1,96 @@
+{% extends 'requestmanager/layout.html' %}
+{% load auth_extras %}
+{% load static %}
+
+{% block content %}
+
+    <div>
+
+
+        <div style="padding: 3rem 2vw 1rem;">
+
+            <div class="steps is-success">
+
+                <div class="step-item is-completed is-success">
+
+                    <div class="step-marker">
+
+                    <span class="icon">
+
+                        <i class="mdi mdi-account"></i>
+
+                    </span>
+
+                    </div>
+
+                    <div class="step-details">
+
+                        <p class="step-title">Escolher Perfil</p>
+
+                    </div>
+
+                </div>
+
+                <div class="step-item is-completed is-success">
+
+                    <div class="step-marker">
+
+                    <span class="icon">
+
+                        <i class="mdi mdi-circle-edit-outline mdi-24px"></i>
+
+                    </span>
+
+                    </div>
+
+
+                    <div class="step-details">
+
+                        <p class="step-title">Preencher Campos</p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="step-item is-completed is-success">
+
+                    <div class="step-marker">
+
+                    <span class="icon">
+
+                        <i class="mdi mdi-check"></i>
+
+                    </span>
+
+                    </div>
+
+                    <div class="step-details">
+
+                        <p class="step-title">Concluir</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div style="margin-bottom:3%;margin-top:3%;">
+                <h2 class="title is-5" style="text-align: center;">Registo feito com sucesso!</h2>
+            </div>
+
+
+            <div style="text-align: center;position:center">
+                <p>Obrigado por se registar na plataforma!</p>
+            </div>
+        </div>
+
+        <div style="text-align: center;position:center;margin-top:4%">
+            <a href="{% url 'requestmanager:welcome_page' %}">
+                <button class="button">Continuar</button>
+            </a>
+        </div>
+    </div>
+
+{% endblock content %}

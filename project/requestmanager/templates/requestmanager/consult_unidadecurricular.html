@@ -1,0 +1,137 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="has-text-centered">
+    <div id="table">
+      <div class="block">
+        <h1 style="text-align: center; font-weight: bold; font-size: larger;">Consultar Pedido de Unidade Curricular</h1>
+        <label class="label">Assunto</label>
+        <input disabled name="assunto" :value=[[pedido_principal.assunto]]>
+        <label class="label">Descrição</label>
+        <input disabled name="descricao" :value=[[pedido_principal.descricao]]>
+        <label class="label">Data Alvo</label>
+        <input disabled type="date" name="descricao" :value=[[pedido_principal.dataalvo]]>
+      </div>
+
+      <div id="table" class="block columns is-centered">
+        <div class="column">
+          <table class="table">
+            <thead>
+                <tr>
+                  <th style="width:10%">Ação</th>
+                  <th style="width:10%">Turma</th>
+                  <th style="width:10%">Unidade Curricular</th>
+                  <th style="width:10%">Descrição</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="i in n" :key="i">
+                  <td><div class="select">
+                    <select disabled :name="'acao' + i" v-model="acoes_init[acoes[i-1]-1]">
+                      <option  v-for="(option, index) in acoes_init" :key="index" :value = option> [[ option ]] </option>
+                    </select>
+                  </div></td>
+
+                  <td><div class="select" >
+                    <select disabled :name="'turma' + i" v-model="turmas_init[turmas[i-1]-1]">
+                      <option v-for="(option, index) in turmas_init" :key="index" :value = option> [[ option ]] </option>
+                    </select>
+                  </div></td>
+
+                    <td><div class="select">
+                      <select disabled :name="'unidade' + i">
+                        <template v-for="(option, index) in unidade" :key="index">
+                          <option v-if="option.nome == unidadeval[i-1]" selected :value = option.id> [[ option.nome ]] </option>
+                          <option v-else :value = option.id> [[ option.nome ]] </option>
+                        </template>
+                      </select></div></td>
+
+                    <td>
+                      <div class="">
+                          <textarea disabled v-if="i <= pedidos.length" :name="'assunto' + i" :value="[[pedidos[i-1].assunto]]"></textarea>
+                          <textarea disabled v-else :name="'assunto' + i"></textarea>
+                      </div>
+                    </td>
+                  
+                </tr>
+
+              </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+    <div class="block">
+      {% if change %}
+      <a href="{% url 'requestmanager:edit_unidadeCurricular' id %}" class="button is-primary">Editar</a>
+      <a href="{% url 'requestmanager:delete_pedido' id %}" class="button is-danger">Eliminar</a>
+      {% endif %}
+      <input class="button is-primary" type=button value="Voltar" onClick="javascript:history.go(-1);">
+    </div>
+  </form> 
+
+<script>
+  var app = new Vue({
+    
+    delimiters: ["[[", "]]"],
+    el: '#table',
+    data() {
+      return{
+        acoes: [],
+        acoes_init: [],
+        turmas: [],
+        turmas_init: [],
+        pedidos: [],
+        indexes: [],
+        unidade: [],
+        unidadeval: [],
+        unidade_nome:[],
+        idsuc: [],
+        pedido_principal: {},
+        n: 1
+      }
+    },
+    async created() {
+      await this.fetchData();
+      this.acoes_init = ['Criar', 'Apagar', 'Alterar'];
+      this.turmas_init = ['T', 'TP', 'PL'];
+      this.pedidos.forEach(p => this.acoes.push(p.acao));
+      this.pedidos.forEach(p => this.turmas.push(p.tipoturmaid));
+      this.getID()
+      this.n = this.pedidos.length
+    },
+    methods: {
+      async fetchData() {
+        pathname = window.location.pathname.split('/')
+        id = pathname[pathname.length - 1]
+        this.unidade = await axios.get('http://127.0.0.1:8000/api/uc_unidadecurricular/' + 3)
+        this.unidade = this.unidade.data
+        this.pedidos = await axios.get('http://127.0.0.1:8000/api/pedido_uc/' + id)
+        this.pedidos = this.pedidos.data
+        this.pedido_principal = await axios.get('http://127.0.0.1:8000/api/pedido/' + id)
+        this.pedido_principal = this.pedido_principal.data
+      },
+      getID(){
+        f = 0
+        for(j = 0; j < this.pedidos.length; j++) {
+          for (i = 0; i < this.unidade.length; i++) {
+            if (this.pedidos[j].unidadecurricularid == this.unidade[i].id){
+              this.unidadeval.push(this.unidade[i].nome)
+            }
+          }
+        }
+      },
+      addLine() {
+        this.n++
+        this.indexes.push(this.n)
+      },
+      removeLine(i){     
+        this.indexes = this.indexes.filter((x) => x != i);
+        this.n--;       
+      },
+
+    },
+  })
+</script>
+
+{% endblock content%}

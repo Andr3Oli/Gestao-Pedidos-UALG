@@ -1,0 +1,260 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+<form method="post" id="form">
+    {% csrf_token %}
+    <h1 style="text-align: center; font-weight: bold; font-size: larger;">Editar Pedido de horario</h1>
+    <div class="has-text-centered">
+        <div id="table">
+            <div class="block">
+                <label class="label">Assunto</label>
+                <input name="assunto" :value=[[pedido_principal.assunto]] class="block input" required>
+                <label class="label">Descrição</label>
+                <input name="descricao" :value=[[pedido_principal.descricao]] class="block textarea" required>
+                <label class="label">Data Alvo</label>
+                <input type="date" name="data" v-model="data" @change="checkDateChange" min="{{ min_date }}"
+                    max="{{ max_date }}" required>
+            </div>
+
+            <div id="table" class="block columns is-centered">
+                <div class="column">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width:10%">Ação</th>
+                                <th style="width:10%">Alteração</th>
+                                <th style="width:10%">Data Origem</th>
+                                <th style="width:10%">Hora Origem</th>
+                                <th style="width:10%">Data Mudança</th>
+                                <th style="width:10%">Hora Mudança</th>
+                                <th style="width:10%">Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(value, i) in pedidos" :key="i">
+
+                                <td>
+                                    <input v-if="value.id != ''" type="hidden" :name="'pedidodinho' + i"
+                                        :value="[[value.id]]" required>
+
+                                        <div class="select">
+                                            <select :name="'acao' + i" v-model="value.acao" required>
+                                                <template v-for="(option, index) in acao" :key="index">
+                                                    <option v-if="value.id != '' && option.id == value.acao" selected
+                                                            :value=option.id>
+                                                        [[option.nome]]
+                                                    </option>
+                                                    <option v-else :value=option.id>
+                                                        [[option.nome]]
+                                                    </option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                </td>
+
+                                <td>
+                                    <div class="select">
+                                        <select :name="'tipo_alteracao' + i"
+                                            v-model="tipoalteracaohorarioid_init[value.tipoalteracaohorarioid-1]"
+                                            required>
+                                            <template v-for="(option, index) in tipoalteracaohorarioid_init"
+                                                :key="index">
+                                                <option
+                                                    v-if="value.id != '' && tipoalteracaohorarioid_init[value.tipoalteracaohorarioid - 1] == option"
+                                                    selected :value=option> [[ option ]]
+                                                </option>
+                                                <option v-else :value=option> [[ option ]]</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="">
+                                        <input v-if="value.id != ''" v-model="value.dataorigem"
+                                            :name="'data_origem' + i" type="date" :value=value.dataorigem
+                                            min="{{ min_date }}" max="{{ max_date }}" required>
+                                        <input v-else v-model="value.dataorigem" :name="'data_origem' + i" type="date"
+                                            min="{{ min_date }}" max="{{ max_date }}" required>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="">
+                                        <input v-if="value.id != ''" :name="'hora_origem' + i"
+                                            :value=[[value.horaorigem]] type="time">
+                                        <input v-else v-model="value.horaorigem" :name="'hora_origem' + i" type="time">
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div>
+                                        <label class="">
+                                            <input v-if="value.id != ''" :name="'data_mudanca' + i" type="date"
+                                                v-model="value.datamudanca"
+                                                @change="checkSmallestDate(value.datamudanca)" min="{{ min_date }}"
+                                                max="{{ max_date }}" required>
+                                            <input v-else v-model="value.datamudanca" :name="'data_mudanca' + i"
+                                                type="date" @change="checkSmallestDate(value.datamudanca)"
+                                                min="{{ min_date }}" max="{{ max_date }}" required>
+                                        </label>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="">
+                                        <input v-if="value.id != ''" :name="'hora_mudanca' + i"
+                                            :value=[[value.horamudanca]] type="time" required>
+                                        <input v-else v-model="value.horamudanca" :name="'hora_mudanca' + i" type="time"
+                                            required>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="">
+                                        <textarea v-if="value.id != ''" :name="'descricao' + i" style="resize: none"
+                                            rows="2" cols="17" :value=[[value.descricao]] required></textarea>
+                                        <textarea v-else v-model="value.descricao" :name="'descricao' + i"
+                                            style="resize: none" rows="2" cols="17" required></textarea>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <b-button rounded type="s-info is-light" size="is-small" @click="removeLine(i)">
+                                        <span class="icon">
+                                            <i class="fas fa-lg fa-solid fa-trash"></i>
+                                        </span>
+                                    </b-button>
+                                </td>
+
+
+                            </tr>
+
+                            <td>
+                                <div style="float: left;">
+                                    <input type="button" class="button" style=" margin-right: 10px; padding: 5px"
+                                        value="Adicionar Linha" @click="addLine()">
+                                </div>
+                            </td>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+        </div>
+        <div class="block"><input class="button is-primary" type="submit" value="Submeter">
+            <input class="button is-primary" type=button value="Voltar" onClick="javascript:history.go(-1);">
+        </div>
+</form>
+
+<script>
+    var app = new Vue({
+
+        delimiters: ["[[", "]]"],
+        el: '#table',
+        data() {
+            return {
+                acao: [],
+                tipoalteracaohorarioid: [],
+                tipoalteracaohorarioid_init: [],
+
+
+                pedidos: [],
+                indexes: [],
+                pedido_principal: {},
+                n: 1,
+                data: '',
+                max_date: '',
+                old_date: ''
+            }
+        },
+        async created() {
+            console.log("sakjdklasmd")
+            await this.fetchData();
+            this.tipopedidohorarioid_init = ['Preparação', 'Alteração'];
+            this.tipoalteracaohorarioid_init = ['Pontual', 'Permanente'];
+            this.pedidos.forEach(p => this.tipoalteracaohorarioid.push(p.tipoalteracaohorarioid));
+            this.pedidos.forEach(element => {
+                element.horaorigem = (element.horaorigem).substring(0, 5)
+                element.horamudanca = (element.horamudanca).substring(0, 5)
+            });
+
+            this.n = this.pedidos.length
+            console.log(this.n)
+        },
+        methods: {
+            async fetchData() {
+                pathname = window.location.pathname.split('/')
+                id = pathname[pathname.length - 1]
+                this.pedidos = await axios.get('http://127.0.0.1:8000/api/pedido_horario/' + id)
+                this.pedidos = this.pedidos.data
+                this.pedido_principal = await axios.get('http://127.0.0.1:8000/api/pedido/' + id)
+                this.pedido_principal = this.pedido_principal.data
+                this.acao = await axios.get('http://127.0.0.1:8000/api/acao/')
+                this.acao = this.acao.data
+                this.data = this.pedido_principal.dataalvo
+                this.old_date = this.data
+
+                if (this.pedidos.length > 0) {
+                    let tempDate = new Date(this.pedidos[0].datamudanca)
+                    for (let i = 1; i < this.pedidos.length; i++) {
+                        let curr = new Date(this.pedidos[i].datamudanca)
+                        if (curr < tempDate) tempDate = curr
+                    }
+                    this.max_date = tempDate
+                } else {
+                    this.max_date = new Date(this.data)
+                }
+            },
+            addLine() {
+                this.n++
+                this.pedidos.push({
+                    id: '',
+                    tipo_pedidoHorario: '',
+                    tipo_alteracao: '',
+                    data_origem: '',
+                    hora_origem: '',
+                    data_mudanca: '',
+                    hora_mudanca: '',
+                    descricao: ''
+                })
+                //this.indexes.push(this.n)
+            },
+            removeLine(i) {
+                //this.pedidos = this.pedidos.filter((x) => x != i);
+                this.$delete(this.pedidos, i)
+                this.n--;
+            },
+            checkSmallestDate(date) {
+                // Obter primeiro elemento
+                let tempDate = new Date(this.pedidos[0].datamudanca) // Cuidado com este nome
+                console.log(tempDate)
+                for (let i = 1; i < this.pedidos.length; i++) {
+                    let curr = new Date(this.pedidos[i].datamudanca) // Cuidado com este nome
+                    if (curr < tempDate) tempDate = curr
+                }
+                this.max_date = tempDate
+                if ((this.max_date < new Date(this.data)) || this.data.localeCompare('') === 0) {
+                    this.data = date
+                    this.old_date = date
+                }
+            },
+            checkDateChange() {
+                let currData = new Date(this.data)
+                // If max_date is not defined yet, return
+                if (this.max_date === '') return
+                if (currData > this.max_date) {
+                    this.data = this.old_date
+                } else {
+                    this.old_date = this.data
+                }
+            }
+
+        },
+    })
+</script>
+
+{% endblock content %}

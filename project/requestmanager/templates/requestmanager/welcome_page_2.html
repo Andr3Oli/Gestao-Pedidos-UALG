@@ -1,0 +1,67 @@
+{% extends 'requestmanager/layout.html' %}
+{% load auth_extras %}
+{% load static %}
+
+{% block content %}
+    <div>
+        <div class="section">
+            <div class="">
+                <div class="">
+                    <h1 class="title has-text-centered">Nova plataforma</h1>
+                    <h1 class="subtitle has-text-centered ">
+                        Simples, Intuitivo, Limpo.
+                    </h1>
+                </div>
+{#                <div class="column is-4">#}
+{#                    <img alt="Logo" src="{% static '/img/logo-large.png' %}"/>#}
+{#                </div>#}
+            </div>
+        </div>
+        <div class="hero is-light">
+            <div class="hero-body">
+                <div class="has-text-centered">
+{#                    <div class="column is-8">#}
+{#                        <p>Dia Aberto </p>#}
+{#                        <small>#}
+{#                            Contacto de suporte:#}
+{#                            <a href=""></a>#}
+{#                        </small>#}
+{#                    </div>#}
+                    <p class="has-text-centered">
+                        A plataforma online para facilitar a vida das nossas funcionárias favoritas foi renovada pelos alunos em
+                        âmbito do curso de Licenciatura de Engenharia Informática.
+                    </p>
+                    <br>
+{#                    <div class="image is-128x128">#}
+{#                        <img src="{% static '/img/ualg-logo.png' %}" alt="Dia Aberto"/>#}
+{#                    </div>#}
+                    <a class="button is-primary is-link" href="{% url 'authmanager:login' %}">Login</a>
+                    <a class="button is-primary" href="{% url 'authmanager:escolher_perfil' %}">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+<script>
+    var app = new Vue({
+        delimiters: ["[[", "]]"],
+        el: "#table",
+        data() {
+            return {
+                toggle: "noOption"
+            }
+        },
+        async created() {
+            console.log(this.toggle)
+        },
+        methods: {
+            checkToggle() {
+                this.toggle = false
+                console.log(this.toggle)
+                //this.indexes.push(this.n)
+            },
+        },
+    })
+
+</script>

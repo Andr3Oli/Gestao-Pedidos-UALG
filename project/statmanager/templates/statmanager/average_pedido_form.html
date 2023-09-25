@@ -1,0 +1,217 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<h1 style="text-align: center; font-weight: bold; font-size: larger;">Estatísticas de Funcionários</h1><br>
+    <div id="table">
+            <div v-if="hasErrors" class="has-text-centered">
+                <span class="">[[errorMessage]]</span>
+            </div>
+            <form id="form">
+                Data inicio:
+                <input type="date" v-model="data_inicio">
+                Data fim:
+                <input type="date" v-model="data_fim">
+                <div class="block columns is-centered">
+                    <div class="column">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th style="width:1%"><input type="checkbox" @change="handleAllCheck">All</th>
+                                <th style="width:10%">Funcionários</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="(value, i) in funcionarios" :key="i">
+                                <td>
+                                    <input v-if="checkboxes[i]" checked type="checkbox" @change="handleCheck(value, i)">
+                                    <input v-else type="checkbox" @change="handleCheck(value, i)">
+                                </td>
+                                <td>
+                                    <span>[[ value.username ]]</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+            <div class="block">
+                <button class="button is-primary" @click="handleSubmit()"> Get </button>
+            </div>
+            <select @change="onChange($event)">
+                <option value="Resolvidos"> Resolvidos </option>
+                <option value="Aceites"> Aceites </option>
+                <option value="Cancelados"> Cancelados </option>
+            </select>
+        </div>
+    </div>
+    <div style="display:flex; align-item:center; justify-content:center">
+        <canvas style="height:50px; width: 100px;" id="myPolarChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script>
+        var myPolarChart
+        var chartData
+        var app = new Vue({
+            delimiters: ["[[", "]]"],
+            el: '#table',
+            data() {
+                return {
+                    funcionarios: [],
+                    selected: [],
+                    checkboxes: [],
+                    data_inicio: '',
+                    data_fim: '',
+                    allChecked: false,
+                    hasErrors: true,
+                    errorMessage: '',
+                    response: '',
+                    change: false
+                }
+            },
+            async created() {
+                await this.fetchData();
+            },
+            methods: {
+                async fetchData() {
+                    this.funcionarios = await axios.get('http://127.0.0.1:8000/api/funcionarios/')
+                    this.funcionarios = this.funcionarios.data
+                    for (let i = 0; i < this.funcionarios.length; i++) this.$set(this.checkboxes, i, false)
+                },
+                handleAllCheck() {
+                    this.funcionarios.forEach(fun => {
+                        let index = this.selected.indexOf(fun);
+                        if (index === -1) this.selected.push(fun)
+                    })
+                    this.allChecked = !this.allChecked
+                    for (let i = 0; i < this.checkboxes.length; i++) this.$set(this.checkboxes, i, this.allChecked)
+                    console.log(this.selected)
+                    console.log(this.checkboxes)
+                },
+                handleCheck(value, i) {
+                    this.allChecked = false
+                    console.log(value)
+                    let index = this.selected.indexOf(value);
+                    if (index !== -1) this.selected.splice(index, 1)
+                    else this.selected.push(value)
+                    this.checkboxes[i] = !this.checkboxes[i]
+                    console.log(this.selected)
+                    console.log(this.checkboxes)
+                },
+                async handleSubmit() {
+                    var endpoint = 'http://127.0.0.1:8000/statmanager/funcionarios_data/'
+                    var selected = JSON.stringify(this.selected)
+                    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAA')
+                    console.log(selected)
+                    
+                    data = await axios.post(endpoint, {
+                        'f': selected, 'data_inicio': this.data_inicio, 'data_fim': this.data_fim
+                    }, {
+                        xsrfCookieName: 'csrftoken',
+                        xsrfHeaderName: 'X-CSRFTOKEN',
+                    }
+                    )
+                    console.log(data.data)
+                    chartData = data.data
+                    this.drawGraph(data.data)
+                    //this.$http.post(endpoint, selected).then(res => this.drawGraph(res))
+                    /*$.ajax({
+                        method: "GET",
+                        url: endpoint,
+                        data: {
+                          'f': selected,
+                        },
+                        success: function (data) {
+                            this.drawGraph(data)
+                            
+                        },
+                        error: function(data) {
+                            console.log(':(')
+                            console.log(data); 
+                              
+                        }
+                    });*/
+                },
+
+                drawGraph(data) {
+                    if (this.change == false) {
+                        var labels = data.labels;
+                        var chartLabel = data.chart_labels;
+                        var chartdata = data.data_resolvidos;
+                        var ctx = document.getElementById('myPolarChart')
+                        myPolarChart = new Chart(ctx, {
+                            type: 'polarArea',
+                            data: {
+                            labels: labels,
+                            datasets: [{
+                                label: chartLabel,
+                                data: chartdata,
+                                backgroundColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(75, 192, 192, 0.5)',
+                                'rgba(153, 102, 255, 0.5)',
+                                'rgba(255, 159, 64, 0.5)'
+                                ],
+                                borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                                ],
+                                borderWidth: 1.5
+                            }]
+                            },
+                            options: {
+                            responsive: true,
+                            
+                            }
+                        });
+                        this.change = true
+                    } else {
+                        myPolarChart.data.datasets[0].data = data.data_resolvidos
+                        myPolarChart.data.labels = data.labels
+                        myPolarChart.update() 
+                    }
+                },
+
+                checkErrors() {
+                    if (this.data_inicio === '' || this.data_fim === '') {
+                        this.errorMessage = "Deve indicar duas datas."
+                        return false
+                    }
+
+                    if (this.data_inicio > this.data_fim) {
+                        this.errorMessage = "A data final deve ser posterior à data inicial."
+                        return false
+                    }
+
+                    if (this.selected.length == 0) {
+                        this.errorMessage = "Deve selecionar pelo menos um funcionário."
+                        return false
+                    }
+                    return this.handleSubmit()
+                },
+                onChange(event){
+                    var change = event.target.value
+                    {#console.log(change)#}
+                    if (change == "Resolvidos"){myPolarChart.data.datasets[0].data = chartData.data_resolvidos}
+                    if(change == "Aceites"){myPolarChart.data.datasets[0].data = chartData.data_aceites}
+                    if(change == "Cancelados"){myPolarChart.data.datasets[0].data = chartData.data_cancelados}
+
+                    myPolarChart.update()
+                },
+
+            },
+        })
+
+        
+    </script>
+
+{% endblock content %}

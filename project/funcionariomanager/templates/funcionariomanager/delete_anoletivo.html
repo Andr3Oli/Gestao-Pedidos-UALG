@@ -1,0 +1,24 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% block content %}
+<p style="text-align:center"><strong>Deseja mesmo apagar?</strong></p><br>
+<div class="file">
+    <div>    
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}, style="color: green;">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+<br>
+<br>
+<div class="center" style="text-align:center">
+    <form action="" method = "POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input class="button is-primary" type="submit" value="Sim">
+          <a href="{%url 'funcionariomanager:list_anoletivo'%}" class="button is-primary">Não</a>
+    </form>
+  </div>
+{% endblock content %}

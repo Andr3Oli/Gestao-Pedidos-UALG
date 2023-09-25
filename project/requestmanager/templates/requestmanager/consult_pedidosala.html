@@ -1,0 +1,178 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+<form class="has-text-centered" method="post" id="form">
+    {% csrf_token %}
+    <div id="table">
+        <div v-if="isDoneFetching">
+            <div class="block">
+                <h1 style="text-align: center; font-weight: bold; font-size: larger;">Consultar Pedido de Sala</h1>
+                <label class="label">Assunto</label>
+                [[pedido_principal.assunto]]
+                <label class="label">Descrição</label>
+                [[pedido_principal.descricao]]
+                <label class="label">Data Alvo</label>
+                [[pedido_principal.dataalvo]]
+                <br><br>
+            </div>
+
+            <div class="block columns">
+                <div class="column">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width:10%">Ação</th>
+                                <th style="width:10%">Lotação</th>
+                                <th style="width:10%">Data</th>
+                                <th style="width:10%">Hora de Inicio</th>
+                                <th style="width:10%">Hora de Fim</th>
+                                <th style="width:10%">Ocasião</th>
+                                <th style="width:10%;">Tipo de sala</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="i in n" :key="i">
+                                <td>
+                                    <div class="select">
+                                        <select disabled :name="'acao' + i" v-model="acoes_init[acoes[i-1]-1]">
+                                            <option v-for="(option, index) in acoes_init" :key="index" :value=option> [[
+                                                option ]] </option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input disabled v-if="i <= pedidos.length" type="hidden" :name="'pedidodinho' + i"
+                                        :value="[[pedidos[i-1].id]]">
+                                    <label>
+                                        <input disabled v-if="i <= pedidos.length" :name="'lotacao' + i"
+                                            :value=[[pedidos[i-1].alunosprevistos]] type="number" min="1" max="475">
+                                        <input disabled v-else :name="'lotacao' + i" type="number">
+                                    </label>
+                                </td>
+                                <td>
+                                    <label>
+                                        <input disabled v-if="i <= pedidos.length" type="date" :name="'data' + i"
+                                            :value=[[pedidos[i-1].data]]>
+                                        <input disabled v-else :name="'data' + i" type="date">
+                                    </label>
+                                </td>
+                                <td>
+                                    <div>
+                                        <label>
+                                            <input disabled v-if="i <= pedidos.length" :name="'horainicio' + i"
+                                                :value=[[pedidos[i-1].horainicio]] type="time"></input>
+                                            <input disabled v-else :name="'horainicio' + i" type="time"></input>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <label>
+                                            <input disabled v-if="i <= pedidos.length" :name="'horafim' + i"
+                                                :value=[[pedidos[i-1].horafim]] type="time"></input>
+                                            <input disabled v-else :name="'horafim' + i" type="time"></input>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="select">
+                                        <select disabled :name="'tipos' + i">
+                                            <template v-for="(option, index) in tipos" :key="index">
+                                                <option
+                                                    v-if="i <= pedidos.length && option.id == pedidos[i-1].tipopedidosalaid"
+                                                    selected :value=option.id>
+                                                    [[option.nome]] </option>
+                                                <option v-else :value=option.id>
+                                                    [[option.nome]] </option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="select" >
+                                        <select disabled :name="'tiposala' + i">
+                                            <template v-for="(option, index) in tiposala" :key="index">
+                                                <option
+                                                    v-if="i <= pedidos.length && option.id == pedidos[i-1].categoriasalaid"
+                                                    selected :value=option.id>
+                                                    [[option.nome]] </option>
+                                                <option v-else :value=option.id>
+                                                    [[option.nome]] </option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if pendente %}
+    <a href="{% url 'requestmanager:edit_pedidoSala' id %}" class="button is-primary">Editar</a>
+    <a href="{% url 'requestmanager:delete_pedido' id %}" class="button is-danger">Eliminar</a>
+    {% endif %}
+    <input class="button is-primary" type=button value="Voltar" onClick="javascript:history.go(-1);">
+</form>
+
+<script>
+    var app = new Vue({
+
+        delimiters: ["[[", "]]"],
+        el: '#table',
+        data() {
+            return {
+                acoes: [],
+                tipos: [],
+                acoes_init: [],
+                pedido_principal: {},
+                pedidos: [],
+                tiposala: [],
+                n: 2,
+                isDoneFetching: false
+            }
+        },
+        async created() {
+            await this.fetchData();
+            this.acoes_init = ['Criar', 'Apagar', 'Alterar'];
+            this.pedidos.forEach(p => this.acoes.push(p.acao));
+            this.isDoneFetching = true;
+            console.log(this.pedidos)
+        },
+        methods: {
+            async fetchData() {
+                pathname = window.location.pathname.split('/')
+                id = pathname[pathname.length - 1]
+                this.unidade = await axios.get('http://127.0.0.1:8000/api/uc_unidadecurricular/' + 3)
+                this.unidade = this.unidade.data
+                this.tiposala = await axios.get('http://127.0.0.1:8000/api/categoriaSala/')
+                this.tiposala = this.tiposala.data
+                this.pedidos = await axios.get('http://127.0.0.1:8000/api/pedido_sala/' + id)
+                this.pedidos = this.pedidos.data
+                this.tipos = await axios.get('http://127.0.0.1:8000/api/tipopedidosala')
+                this.tipos = this.tipos.data
+                this.pedidos.forEach(element => {
+                    element.horainicio = (element.horainicio).substring(0, 5)
+                    element.horafim = (element.horafim).substring(0, 5)
+                });
+                this.pedido_principal = await axios.get('http://127.0.0.1:8000/api/pedido/' + id)
+                this.pedido_principal = this.pedido_principal.data
+                this.n = this.pedidos.length
+            },
+
+            addLine() {
+                this.n++
+                //this.indexes.push(this.n)
+            },
+            removeLine(i) {
+                //this.indexes = this.indexes.filter((x) => x != i);
+                this.n--;
+            },
+
+        },
+    })
+</script>
+
+{% endblock content %}

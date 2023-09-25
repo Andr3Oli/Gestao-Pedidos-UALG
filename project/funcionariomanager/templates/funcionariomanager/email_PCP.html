@@ -1,0 +1,15 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+    <form class="has-text-centered" method="post" id="form">
+      {% csrf_token %}
+      <h1 style="text-align: center; font-weight: bold; font-size: larger;">Email para PCP</h1>
+      <label class="label">Assunto</label>
+      {{form.assunto}}
+      <label class="label">Descrição</label>
+      {{form.descricao}}
+      <br><br>
+      <input class="button is-primary" type="submit" value="Enviar">
+    </form>
+{% endblock content%}

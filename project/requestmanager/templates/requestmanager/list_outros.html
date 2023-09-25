@@ -1,0 +1,43 @@
+{% extends 'requestmanager/layout.html' %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% block content %}
+<p style="text-align:center; font-size: larger;"><strong>Lista de Pedidos Outros</strong></p>
+<button class="button"><a href="{% url 'requestmanager:create_pedidooutro' %}">Criar Pedido</a></button>
+<div class="columns">
+    <div class="column is-one-quarter">
+        {% if filter %}
+        <form action="" method="get" class="form form-inline">
+            <div style="margin-top: 13px">
+                <span style="font-weight: bolder; font-size: large;">Filtros</span>
+                <table class="table is-narrow">
+                    <tr>
+                        <td>Estado:</td>
+                        <td>&Tab;</td>
+                        <td>{{filter.form.estado}}</td>
+                    </tr>
+                    <tr>
+                        <td>Data Alvo:</td>
+                        <td>&Tab;</td>
+                        <td>{{filter.form.DataAlvo}}</td>
+                    </tr>
+                    <tr>
+                        <td>A partir de:</td>
+                        <td>&Tab;</td>
+                        <td>{{filter.form.DataAlvo__gt}}</td>
+                    </tr>
+                    <tr>
+                        <td>Antes de:</td>
+                        <td>&Tab;</td>
+                        <td>{{filter.form.DataAlvo__lt}}</td>
+                    </tr>
+                </table>
+            </div>
+            <br>
+            <input class="button is-primary" type="submit" value="Aplicar Filtros" id="filter">
+        </form>
+        {% endif %}
+    </div>
+    <div class="column">{% render_table table %}</div>
+</div>
+{% endblock content%}

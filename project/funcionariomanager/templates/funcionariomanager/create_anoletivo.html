@@ -1,0 +1,27 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% block content %}
+<h1 style="text-align: center; font-weight: bold; font-size: larger;">Criar Ano Letivo</h1>
+<br>
+<div>
+    <div>
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <span style="font-weight: bolder; font-size: medium;">Selecione as datas do ano letivo:</span><br>
+            Data Inicio: {{form.datainicio}} <br><br>
+            Data Fim: {{form.datafim}}
+            
+            <br><br>
+            <input class="button" type="submit" value="Submit">
+        </form>
+    </div>
+    <div>    
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}, style="color: red;">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

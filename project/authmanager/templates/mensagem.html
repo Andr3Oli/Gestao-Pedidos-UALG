@@ -1,0 +1,67 @@
+{% extends 'requestmanager/layout.html' %}
+{% load auth_extras %}
+
+
+
+{% block title %}- {{ m }}{% endblock title %}
+
+
+
+{% block content %}
+
+    <div style="margin-top:5%">
+
+        {% if tipo == 'success' %}
+            <article class="message is-success">
+                <div class="message-body">
+                    <p style="text-align: center;">
+                        <strong>{{ m }}</strong>
+                    </p>
+                </div>
+            </article>
+        {% elif tipo == 'info' %}
+            <article class="message is-info">
+                <div class="message-body">
+                    <p style="text-align: center;">
+                        <strong>{{ m }}</strong>
+                    </p>
+                </div>
+            </article>
+        {% elif tipo == 'warning' %}
+            <article class="message is-warning">
+                <div class="message-body">
+                    <p style="text-align: center;">
+                        <strong>{{ m }}</strong>
+                    </p>
+                </div>
+            </article>
+        {% elif tipo == 'error' %}
+            <article class="message is-danger">
+                <div class="message-body">
+                    <p style="text-align: center;">
+                        <strong>{{ m }}</strong>
+                    </p>
+                </div>
+            </article>
+        {% endif %}
+    </div>
+    {% if continuar != 'off' %}
+        <div style="text-align: center;position:center;margin-top:4%">
+            {% if user.is_authenticated and user|has_group:'ProfessorUniversitario' %}
+                <a href="{% url 'requestmanager:app_render' user.id %}">
+                    <button class="button">Continuar</button>
+                </a>
+            {% elif  user.is_authenticated and user|has_group:'Funcionario' %}
+                <a href="{% url 'funcionariomanager:app_render' user.id %}">
+                    <button class="button">Continuar</button>
+                </a>
+            {% else %}
+                <a href="{% url 'requestmanager:welcome_page' %}">
+                    <button class="button">Continuar</button>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock content %}
+
+</div>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+{% extends 'requestmanager/layout.html' %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<head>
+    <title>Success</title>
+    <meta http-equiv="refresh" content="3; url=../../requestmanager/app/{{ user_id }}">
+</head>
+
+<body>
+    <div style="text-align: center;">
+        <span style="font-size: 80px;">Sucesso!</span><br>
+        <p><span style="font-size: 40px;">{{message}}</span></p>
+        <p>Você será redirecionado para a página principal em 3 segundos...</p>
+    </div>
+</body>
+{% endblock content %}
+
+</html>

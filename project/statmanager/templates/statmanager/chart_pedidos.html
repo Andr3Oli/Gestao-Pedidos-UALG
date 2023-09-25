@@ -1,0 +1,288 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% block content %}
+
+<!-- isto aqui é do para o graficos da estatistica desculpem tar desorganizado -->
+<!-- Latest compiled and minified CSS -->
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+<div class="container-fluid">
+  <h1 style="text-align: center; font-weight: bold; font-size: larger;">Estatísticas de Pedidos</h1><br>
+  <center class="row">
+    <text> Numero de pedidos <text />
+  </center>
+  <div class="row">
+    <canvas style="height:50px; width: 200px;" id="myChartBar"></canvas>
+    <span>Filtrar por Estado:</span>
+    <select id="choice" onChange="checkChoice(this)">
+      <option value="noOptions"> ----------- </option>
+      <option value="Pendentes"> Pendentes </option>
+      <option value="Aceites"> Aceites </option>
+      <option value="Resolvidos"> Resolvidos </option>
+    </select>
+  </div>
+  <hr style="height: 5px; width: 95%;" />
+  <div class="row">
+    <div style="display:flex; align-item:center; justify-content:center">
+      <div class="" style="width: 50%">
+        <h1 style="text-align: center; font-weight: bold; font-size: large;">Número de pedidos Aceites/Rejeitados</h1>
+        <br>
+        <canvas style="height:50px; width: 100px;" id="myChartLine"></canvas>
+        <form id="lineChartForm">
+          <span>Filtrar por Ano Letivo:</span>
+          <select id='choiceAL'>
+            {% for choice in alChoices%}
+            <option value="{{choice}}"> {{choice}} </option>
+            {% endfor %}
+          </select>
+          <input class="button is-small  is-outlined" type="button" value="Aplicar Filtros" id="Search">
+        </form>
+      </div>
+      <div class="" style="width: 50%">
+
+        <div class="has-text-centered">
+          <h1 style="text-align: center; font-weight: bold; font-size: large;">Media de processo pedido</h1><br>
+          <span>Período:</span><br>
+          <span>&nbsp;&nbsp; Data Inicio</span>
+          <input type='date' id="first_date"><br>
+          <span>&nbsp;&nbsp; Data Fim</span>
+          <input type='date' id="second_date"><br>
+          <span>Ano Letivo</span>
+          <select id='AL'>
+            {% for choice in alChoices%}
+            <option value="{{choice}}"> {{choice}} </option>
+            {% endfor %}
+          </select>
+          <br>
+          <span>Tipo de Pedido</span>
+          <select id='choiceTipo'>
+            <option value="Todos"> Todos </option>
+            {% for tipo in tipos %}
+            <option value="{{tipo}}"> {{tipo.nome}} </option>
+            {% endfor %}
+          </select>
+          <br><br>
+          <div>
+            <label id='media' name='media' value='teste'></label>
+          </div>
+          <br>
+          <input class="button" value="Calcular" id="Calc"></input>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+<script>
+  var endpoint = '/statmanager/chart_data';
+  var endpoint2 = '/statmanager/lchartdata';
+  var endpoint3 = '/statmanager/lchartdata2';
+  var endpoint4 = '/statmanager/pedidos_media';
+  var data_global;
+  var myPieChart;
+  var myLineChart;
+  var ctx = document.getElementById('myChartBar');
+  var ctx2 = document.getElementById('myChartLine');
+
+
+  $.ajax({
+    method: "GET",
+    url: endpoint,
+    success: function (data) {
+      data_global = data;
+      drawBarGraph(data, data.chartdata);
+      console.log("drawing");
+    },
+    error: function (error_data) {
+      console.log(error_data);
+    }
+  })
+
+
+  $.ajax({
+    method: "GET",
+    url: endpoint2,
+    success: function (data) {
+      console.log(data.labels)
+      drawLineGraph(data);
+      console.log("drawing");
+    },
+    error: function (error_data) {
+      console.log(error_data);
+    }
+  })
+
+
+
+  $(function () {
+    $('#Search').on('click', function () {
+      var slect = document.getElementById('choiceAL');
+      var slect_value = slect.value;
+      console.log(slect_value)
+      $.ajax({
+        method: "GET",
+        url: endpoint3,
+        data: {
+          'anoletivo': slect_value,
+        },
+        success: function (data) {
+          console.log('Sucesss')
+          console.log(data.labels)
+          myLineChart.data.labels = data.labels;
+          myLineChart.data.datasets[0].data = data.chartdata[0];
+          myLineChart.data.datasets[1].data = data.chartdata[1];
+          myLineChart.data.datasets[0].backgroundColor = data.color1;
+          myLineChart.data.datasets[1].backgroundColor = data.color2;
+          myLineChart.data.datasets[0].borderColor = data.color1;
+          myLineChart.data.datasets[1].borderColor = data.color2;
+          myLineChart.update();
+        },
+        error: function (data) {
+          console.log(':(')
+          console.log(data);
+
+        }
+      });
+    });
+  });
+
+  $(function () {
+    $('#Calc').on('click', function () {
+      var tipo = document.getElementById('choiceTipo');
+      var anoLetivo = document.getElementById('AL');
+      var first_date = document.getElementById('first_date');
+      var second_date = document.getElementById('second_date');
+
+      var tipo_value = tipo.value;
+      var anoLetivo_value = anoLetivo.value;
+      var fdate = first_date.value;
+      var sdate = second_date.value;
+      console.log(tipo_value)
+      console.log(anoLetivo_value)
+      $.ajax({
+        method: "GET",
+        url: endpoint4,
+        data: {
+          'anoletivo': anoLetivo_value,
+          'tipo': tipo_value,
+          'first_date': fdate,
+          'second_date': sdate,
+        },
+        success: function (data) {
+          console.log(data)
+          if (data != "0")
+            document.getElementById('media').innerHTML = data
+          else
+            document.getElementById('media').innerHTML = "Não existem pedidos nos perimetros que definiu.\n Não é possivel calcular a media."
+        },
+        error: function (data) {
+          console.log(':(')
+          console.log(data);
+
+        }
+      });
+    });
+  });
+
+
+
+  function drawBarGraph(data, chart_values) {
+    var labels = data.labels;
+    var chartLabel = data.chartLabel;
+    var chartdata = chart_values;
+    myPieChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: chartLabel,
+          data: chartdata,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.5)',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(255, 206, 86, 0.5)',
+            'rgba(75, 192, 192, 0.5)',
+            'rgba(153, 102, 255, 0.5)',
+            'rgba(255, 159, 64, 0.5)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+          ],
+          borderWidth: 1.5
+        }]
+      },
+      options: {
+        responsive: true,
+
+      }
+    });
+  }
+
+  function drawLineGraph(data) {
+    var labels = data.labels;
+    var chartLabel = data.chartLabel;
+    var chartdata = data.chartdata;
+    var color1 = data.color1;
+    var color2 = data.color2;
+    myLineChart = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: chartLabel[0],
+          data: chartdata[0],
+          backgroundColor: color1,
+          borderColor: color1,
+          borderWidth: 1.5
+        },
+        {
+          label: chartLabel[1],
+          data: chartdata[1],
+          backgroundColor: color2,
+          borderColor: color2,
+          borderWidth: 1.5
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+
+  function checkChoice(choice) {
+    if (choice.value == "Pendentes") {
+      myPieChart.data.datasets[0].data = data_global.chartdata_pendentes;
+    }
+    else if (choice.value == "Aceites") {
+      myPieChart.data.datasets[0].data = data_global.chartdata_aceites;
+    }
+    else if (choice.value == "Resolvidos") {
+      myPieChart.data.datasets[0].data = data_global.chartdata_resolvidos;
+    }
+    else {
+      myPieChart.data.datasets[0].data = data_global.chartdata;
+    }
+
+    myPieChart.update();
+
+  }
+
+</script>
+{% endblock content%}

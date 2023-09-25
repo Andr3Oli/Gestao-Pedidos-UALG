@@ -1,0 +1,27 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% load render_table from django_tables2 %}
+{% block content %}
+    <h1 style="text-align: center; font-weight: bold; font-size: larger;">Listar Ano Letivo</h1>
+    <div v-if="toggle">
+        {% if messages %}
+            <ul class="messages box has-text-centered"
+                style="width: fit-content; margin: auto; margin-top: 5px; margin-bottom: 5px">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                            <span style="color: green;">{{ message }}</span>
+                        {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                            <span style="color: red;">{{ message }}</span>
+                        {% endif %}
+                        <b-button rounded type="s-info is-light" size="is-small" @click="checkToggle"><span
+                                class="icon"><i
+                                class="fa fa-times" aria-hidden="true"></i></span></b-button>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div style="width: fit-content; margin: auto;" class="box">
+        {% render_table table %}
+    </div>
+{% endblock content %}

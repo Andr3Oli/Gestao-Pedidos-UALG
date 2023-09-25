@@ -1,0 +1,135 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+    {% if errors != "" %}
+        <div class="has-text-centered">
+            <span class="text-danger">{{ errors }}</span>
+        </div>
+    {% endif %}
+
+    <div id="table">
+        <form class="has-text-centered" method="post" id="form">
+            {% csrf_token %}
+            <h1 style="text-align: center; font-weight: bold;  font-size: larger;">Criar Pedido Outro</h1>
+            <label class="label">Assunto</label>
+            <input name="assunto" value="{{ old_data.assunto }}" class="block input" required>
+            <label class="label">Descrição</label>
+            <textarea name="descricao" class="block textarea" required>{{ old_data.descricao }}</textarea>
+            <div class="block">
+                <label class="label">Data Alvo</label>
+                <input type="date" value="{{ old_data.date }}" name="date" v-model="date" @change="checkDateChange"
+                       min="{{ min_date }}" max="{{ max_date }}" required>
+            </div>
+
+            <div class="block columns is-centered">
+                <div class="column">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width:10%">Assunto</th>
+                            <th style="width:10%">Descrição</th>
+                            <th style="width:10%">Data alvo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr v-for="(value, i) in pedidos" :key="i">
+                            <td>
+                                <div class="">
+                                    <input :name="'assunto' + i" value="value" v-model="value.assunto_pedido" required>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="">
+                                    <textarea :name="'descricao' + i" v-model="value.descricao_pedido" required></textarea>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="date" :name="'date' + i" v-model="value.dataalvo_pedido"
+                                       @change="checkSmallestDate(value.dataalvo_pedido)" min="{{ min_date }}" max="{{ max_date }}" required>
+                            </td>
+                            <td>
+                                <b-button rounded type="s-info is-light" size="is-small" @click="removeLine(i)">
+                                <span class="icon">
+                                    <i class="fas fa-lg fa-solid fa-trash"></i>
+                                </span>
+                                </b-button>
+                            </td>
+                        </tr>
+
+                        <td>
+                            <div style="float: left;">
+                                <input type="button" class="button" style=" margin-right: 10px; padding: 5px"
+                                       value="Adicionar Linha" @click="addLine()">
+                            </div>
+                        </td>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="block">
+                <input class="button is-primary" type="submit" value="Submeter">
+                <input class="button is-danger" type=button value="Cancelar" onClick="javascript:history.go(-1);"></div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        var app = new Vue({
+
+            delimiters: ["[[", "]]"],
+            el: '#table',
+            data() {
+                return {
+                    pedidos: [],
+                    n: 1,
+                    date: '',
+                    old_date: '',
+                    max_date: ''
+                }
+            },
+            async created() {
+            },
+            methods: {
+                addLine() {
+                    this.n++
+                    this.pedidos.push({
+                        id: '',
+                        assunto_pedido: '',
+                        descricao_pedido: '',
+                        dataalvo_pedido: ''
+                    })
+                },
+                removeLine(i) {
+                    this.$delete(this.pedidos, i)
+                    this.n--;
+                },
+                checkSmallestDate(date) {
+                    // Obter primeiro elemento
+                    let tempDate = new Date(this.pedidos[0].dataalvo_pedido)
+                    for (let i = 1; i < this.pedidos.length; i++) {
+                        let curr = new Date(this.pedidos[i].dataalvo_pedido)
+                        if (curr < tempDate) tempDate = curr
+                    }
+                    this.max_date = tempDate
+                    if ((this.max_date < new Date(this.date)) || this.date.localeCompare('') === 0) {
+                        this.date = date
+                        this.old_date = date
+                    }
+                },
+                checkDateChange() {
+                    let currData = new Date(this.date)
+                    // If max_date is not defined yet, return
+                    if (this.max_date === '') return
+                    if (currData > this.max_date) {
+                        this.date = this.old_date
+                    } else {
+                        this.old_date = this.date
+                    }
+                }
+            },
+        })
+    </script>
+
+{% endblock content %}

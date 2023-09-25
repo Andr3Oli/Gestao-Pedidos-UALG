@@ -1,0 +1,165 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="has-text-centered">
+        <h1 style="text-align: center; font-weight: bold; font-size: larger;">Consultar Pedido de Horário</h1>
+        <div id="table">
+            <div class="block">
+                <label class="label">Assunto</label>
+                <input disabled name="assunto" :value=[[pedido_principal.assunto]]>
+                <label class="label">Descrição</label>
+                <input disabled name="descricao" :value=[[pedido_principal.descricao]]>
+                <label class="label">Data Alvo</label>
+                <input disabled type="date" name="descricao" :value=[[pedido_principal.dataalvo]]>
+            </div>
+
+            <div id="table" class="block columns is-centered">
+                <div class="column">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width:10%">Ação</th>
+                            <th style="width:10%">Alteração</th>
+                            <th style="width:10%">Data Origem</th>
+                            <th style="width:10%">Hora Origem</th>
+                            <th style="width:10%">Data Mundança</th>
+                            <th style="width:10%">Hora Mundança</th>
+                            <th style="width:10%">Descrição</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="i in n" :key="i">
+                            <td>
+                                <div class="select">
+                                    <select disabled :name="'acao' + i" v-model="acoes_init[acoes[i-1]-1]">
+                                        <option v-for="(option, index) in acoes_init" :key="index" :value=option> [[
+                                            option ]] </option>
+                                    </select>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="select">
+                                    <select disabled :name="'turma' + i"
+                                            v-model="tipoalteracaohorarioid_init[tipoalteracaohorarioid[i-1]-1]">
+                                        <option v-for="(option, index) in tipoalteracaohorarioid_init" :key="index"
+                                                :value=option> [[ option ]]
+                                        </option>
+                                    </select>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <input disabled :name="'data_origem' + i" type="date"
+                                           :value=[[pedidos[i-1].dataorigem]]>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <input disabled :name="'hora_origem' + i" :value=[[pedidos[i-1].horaorigem]]
+                                           type="time">
+                                </div>
+                            </td>
+
+                            <td>
+                                <div>
+                                    <labe l class="">
+                                        <input disabled :name="'data_mudanca' + i" type="date"
+                                               :value=[[pedidos[i-1].datamudanca]]>
+                                        </label>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <input disabled :name="'hora_mudanca' + i" :value=[[pedidos[i-1].horamudanca]]
+                                           type="time">
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <textarea disabled :name="'descricao' + i" style="resize: none" rows="2" cols="17"
+                                              :value=[[pedidos[i-1].descricao]]></textarea>
+                                </div>
+                            </td>
+
+
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% if pendente %}
+            <a href="{% url 'requestmanager:edit_pedidoHorario' id %}" class="button is-primary">Editar</a>
+            <a href="{% url 'requestmanager:delete_pedido' id %}" class="button is-danger">Eliminar</a>
+        {% endif %}
+        <input class="button is-primary" type=button value="Voltar" onClick="javascript:history.go(-1);">
+    </div>
+    </form>
+
+    <script>
+        var app = new Vue({
+
+            delimiters: ["[[", "]]"],
+            el: '#table',
+            data() {
+                return {
+                    acoes: [],
+                    acoes_init: [],
+                    tipopedidohorarioid: [],
+                    tipopedidohorarioid_init: [],
+                    tipoalteracaohorarioid: [],
+                    tipoalteracaohorarioid_init: [],
+
+
+                    pedidos: [],
+                    indexes: [],
+                    pedido_principal: {},
+                    n: 1
+                }
+            },
+            async created() {
+                console.log("sakjdklasmd")
+                await this.fetchData();
+                this.tipoalteracaohorarioid_init = ['Pontual', 'Permanente'];
+                this.acoes_init = ['Criar', 'Apagar', 'Alterar'];
+                this.pedidos.forEach(p => this.acoes.push(p.acao));
+                this.pedidos.forEach(p => this.tipoalteracaohorarioid.push(p.tipoalteracaohorarioid));
+                this.pedidos.forEach(element => {
+                    element.horaorigem = (element.horaorigem).substring(0, 5)
+                    element.horamudanca = (element.horamudanca).substring(0, 5)
+                });
+                this.n = this.pedidos.length
+                console.log(this.n)
+                //console.log(this.pedidos[1].horaorigem)
+
+            },
+            methods: {
+                async fetchData() {
+                    pathname = window.location.pathname.split('/')
+                    id = pathname[pathname.length - 1]
+                    this.pedidos = await axios.get('http://127.0.0.1:8000/api/pedido_horario/' + id)
+                    this.pedidos = this.pedidos.data
+                    this.pedido_principal = await axios.get('http://127.0.0.1:8000/api/pedido/' + id)
+                    this.pedido_principal = this.pedido_principal.data
+                },
+                addLine() {
+                    this.n++
+                    this.indexes.push(this.n)
+                },
+                removeLine(i) {
+                    this.indexes = this.indexes.filter((x) => x != i);
+                    this.n--;
+                },
+
+            },
+        })
+    </script>
+
+{% endblock content %}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+{% extends 'funcionariomanager/layout.html' %}
+{% block content %}
+
+<head>
+    <title>Success</title>
+    <meta http-equiv="refresh" content="3; url=/funcionariomanager/app/{{user.id}}">
+</head>
+
+<body>
+    <div style="text-align: center;">
+
+        <span style="font-size: 80px;">Sucesso!</span><br>
+        <p><span style="font-size: 40px;">{{message}}</span></p>
+        <p>Você será redirecionado para a página principal em 3 segundos...</p>
+    </div>
+</body>
+{% endblock content %}
+
+</html>

@@ -1,0 +1,45 @@
+INSERT INTO EstadoPedido(Nome) VALUES("Pendente");
+INSERT INTO EstadoPedido(Nome) VALUES("Em Processo");
+INSERT INTO EstadoPedido(Nome) VALUES("Aceite");
+INSERT INTO EstadoPedido(Nome) VALUES ("Rejeitado");
+
+INSERT INTO TipoTurma(Nome) VALUES("T");
+INSERT INTO TipoTurma(Nome) VALUES("TP");
+INSERT INTO TipoTurma(Nome) VALUES("PL");
+
+INSERT INTO TipoAcao(Nome) VALUES("Criar");
+INSERT INTO TipoAcao(Nome) VALUES("Apagar");
+INSERT INTO TipoAcao(Nome) VALUES("Alterar");
+
+INSERT INTO TipoPedido(Nome) VALUES("Outros");
+INSERT INTO TipoPedido(Nome) VALUES("Salas");
+INSERT INTO TipoPedido(Nome) VALUES("Unidades Curriculares");
+INSERT INTO TipoPedido(Nome) VALUES("Horários");
+
+INSERT INTO TipoAlteracaoHorario(Nome) VALUES("Pontual");
+INSERT INTO TipoAlteracaoHorario(Nome) VALUES("Permanente");
+
+INSERT INTO TipoPedidoHorario(Nome) VALUES("Preparação");
+INSERT INTO TipoPedidoHorario(Nome) VALUES("Alteração");
+
+INSERT INTO TipoConta(Nome) VALUES("Docente");
+INSERT INTO TipoConta(Nome) VALUES("Funcionário");
+INSERT INTO TipoConta(Nome) VALUES("Presidente CP");
+
+INSERT INTO Tiporegencia(Nome) VALUES("Curso");
+INSERT INTO Tiporegencia(Nome) VALUES("Departamento");
+INSERT INTO Tiporegencia(Nome) VALUES("Disciplina");
+
+INSERT INTO AnoLetivo(Nome, DataInicio, DataFim) VALUES("2022-23", '2022/09/01', '2023/07/02');
+INSERT INTO AnoLetivo(Nome, DataInicio, DataFim) VALUES("2023-24", '2023/09/01', '2024/07/02');
+
+INSERT INTO TipoPedidoSala(Nome) VALUES("Aula");
+INSERT INTO TipoPedidoSala(Nome) VALUES("Frequência");
+INSERT INTO TipoPedidoSala(Nome) VALUES("Exame");
+INSERT INTO TipoPedidoSala(Nome) VALUES("Reunião");
+INSERT INTO TipoPedidoSala(Nome) VALUES("Palestra");
+INSERT INTO TipoPedidoSala(Nome) VALUES("Evento");
+INSERT INTO TipoPedidoSala(Nome) VALUES("Workshop");
+
+INSERT INTO Faculdade(Nome) VALUES("FCT");
+INSERT INTO Departamento(Nome, faculdadeid_id) VALUES("Engenharia Informática", "1");

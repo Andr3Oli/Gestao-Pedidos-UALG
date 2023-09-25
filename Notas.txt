@@ -1,0 +1,53 @@
+A fazer:
+
+> Mensagem de sucesso serem pequenas (popups)
+
+> requestmanager/app/
+    - responsavel pelo pedido   - done
+    - filtro dava alvo deve ser entre duas datas
+    -
+> requestmanager -> listas de pedidos por tipo
+    - responsavel pelo pedido   - done
+    - aplicar filtros               - done
+    -
+> requestmanager/create_pedidoSala
+    - ação (criar/editar/apagar)    - done
+    - Verificações - done
+        - Data Alvo » Deve ser >= que o dia atual & Deve ser <= ano letivo
+        - Data » Deve ser >= que dia atual
+        - Data Alvo » Deve ser atualizada para a menor data (data dos mini.pedidos)
+    -
+> funcionariomanager/app
+    - filtro dava alvo deve ser entre duas datas
+
+> datamanager/importDSD
+    - Deve ter a opção de escolher o ano letivo
+      (porque para cada ano letivo existem novos imports)
+        -Atualizar tabelas afetadas pelo import com o ano letivo
+    - Verificações  - done??
+        - Formato do ficheiro
+        - Ficheiro correto (se estou a importar DSD não posso permitir o ficheiro RUC)
+    - (?Talvez mensagens se algo foi atualizado ou não?)
+    - Permitir import por linhas
+
+> Pedidos
+    - Acabar verificacao de data alvo ser a menor dos pedidozinhos - done
+
+>statmanager/ 
+    - As estatisticas devem ser apresentadas em formato de graficos
+    - O tempo de processo medio deve ter 4 filtros (ano letivo, data inicial, data final, tipo de pedido)
+    - Estaticas devem tar em formato de percentagem
+    - Estaticas de funcionario devem ser todas apresentadas aos mesmo
+        - media de pedidos resolvidos por funcionario num espaço de tempo
+        - pedidos concluidos, rejeitados
+        - numero total de pedidos a que está associado
+    - Estatiscaticas de pedidos:
+        - numero de pedidos totais por tipo
+        - numero de pedidos resolvidos, pendentes em em processo por tipo de pedido e pedido totais
+        - percentagems de pedidos resolvidos em um espaço de tempo
+
+> Authentication
+    - Meter mensagens de erros
+
+
+criar template para funcionario ver os seus pedidos aceites

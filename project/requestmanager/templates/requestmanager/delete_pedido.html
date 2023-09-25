@@ -1,0 +1,11 @@
+{% extends 'requestmanager/layout.html' %}
+{% block content %}
+<p style="text-align:center"><strong>Deseja mesmo apagar?</strong></p><br>
+<div class="center" style="text-align:center">
+  <form action="" method = "POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input class="button is-primary" type="submit" value="Sim">
+        <a href="{%url 'requestmanager:app_render' user.id%}" class="button is-primary">Não</a>
+  </form>
+</div>
+{% endblock content %}

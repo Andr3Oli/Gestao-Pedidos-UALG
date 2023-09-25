@@ -1,0 +1,211 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div id="table">
+    <form class="has-text-centered" method="post" id="form">
+        {% csrf_token %}
+        <h1 style="text-align: center; font-weight: bold; font-size: larger;">Criar Pedido de horario</h1>
+        <label class="label">Assunto</label>
+        <input name="assunto" value="{{ old_data.assunto }}" class="block input" required>
+        <label class="label">Descrição</label>
+        <textarea name="descricao" class="block textarea" required>{{ old_data.descricao }}</textarea>
+        <div class="block">
+            <label class="label">Data Alvo
+                <input type="date" name="data" v-model="data" @change="checkDateChange()" min="{{ min_date }}"
+                    max="{{ max_date }}" required>
+            </label>
+        </div>
+
+        <div class="block columns is-centered">
+            <div class="column">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:10%">Ação</th>
+                            <th style="width:10%">Alteração</th>
+                            <th style="width:10%">Data Origem</th>
+                            <th style="width:10%">Hora Origem</th>
+                            <th style="width:10%">Data Mudança</th>
+                            <th style="width:10%">Hora Mudança</th>
+                            <th style="width:10%">Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(value, i) in pedidos" :key="i">
+                            <td>
+                                <div class="select">
+                                    <select :name="'acao' + i" v-model="value.acao" required>
+                                        <option v-for="(option, index) in acao" :key="index" :value=option.id> [[
+                                            option.nome ]]
+                                        </option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="select">
+                                    <select :name="'alteracao_pdd' + i" v-model="value.tipoalteracaohorarioid" required>
+                                        <option v-for="(option, index) in tipoAlteracao" :key="index" :value=option> [[
+                                            option ]]
+                                        </option>
+                                    </select>
+                                </div>
+                            </td>
+
+
+                            <td>
+                                <div class="">
+                                    <input :name="'data_origem' + i" type="date" min="{{ min_date }}"
+                                        max="{{ max_date }}" required>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <input :name="'hora_origem' + i" type="time" v-model="value.horaorigem" required>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <input :name="'data_mudanca' + i" type="date" v-model="value.data_mudanca"
+                                        @change="checkSmallestDate(value.data_mudanca)" min="{{ min_date }}"
+                                        max="{{ max_date }}" required>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <input :name="'hora_mudanca' + i" type="time" v-model="value.horamudanca" required>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="">
+                                    <textarea :name="'descricao' + i" style="resize: none" rows="2" cols="17"
+                                        v-model="value.descricao" required></textarea>
+                                </div>
+                            </td>
+
+                            <td>
+                                <b-button rounded type="s-info is-light" size="is-small" @click="removeLine(i)">
+                                    <span class="icon">
+                                        <i class="fas fa-lg fa-solid fa-trash"></i>
+                                    </span>
+                                </b-button>
+                            </td>
+
+                        </tr>
+
+                        <td>
+                            <div style="float: left;">
+                                <input type="button" class="button" style=" margin-right: 10px; padding: 5px"
+                                    value="Adicionar Linha" @click="addLine()">
+                            </div>
+                        </td>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="block"><input class="button is-primary" type="submit" value="Submeter">
+            <input class="button is-danger" type=button value="Cancelar" onClick="javascript:history.go(-1);">
+        </div>
+
+</div>
+</form>
+</div>
+<script>
+    var app = new Vue({
+
+        delimiters: ["[[", "]]"],
+        el: '#table',
+        data() {
+            return {
+                id: '',
+                tipo_pdd: '',
+                acao: [],
+                alteracao_pdd: '',
+                data_origem: '',
+                hora_origem: '',
+                data_mudanca: '',
+                hora_mudanca: '',
+                descricao: '',
+                pedidos: [],
+                n: 1,
+                data: '',
+                old_date: '',
+                max_date: '',
+            }
+        },
+        async created() {
+            await this.fetchData();
+            this.pedidos.push({
+                id: '',
+                acao: '',
+                tipo_pedidoHorario: '',
+                tipo_alteracao: '',
+                data_origem: '',
+                hora_origem: '',
+                data_mudanca: '',
+                hora_mudanca: '',
+                descricao: ''
+            })
+        },
+        methods: {
+            async fetchData() {
+                this.acao = await axios.get('http://127.0.0.1:8000/api/acao/')
+                this.acao = this.acao.data
+                this.tipoAlteracao = ['Pontual', 'Permanente'];
+                this.tipo_pddHorario = ['Preparação', 'Alteração'];
+            },
+            addLine() {
+                this.n++
+                this.pedidos.push({
+                    id: '',
+                    acao: '',
+                    tipo_pedidoHorario: '',
+                    tipo_alteracao: '',
+                    data_origem: '',
+                    hora_origem: '',
+                    data_mudanca: '',
+                    hora_mudanca: '',
+                    descricao: ''
+                })
+                //this.indexes.push(this.n)
+            },
+            removeLine(i) {
+                //this.pedidos = this.pedidos.filter((x) => x != i);
+                this.$delete(this.pedidos, i)
+                this.n--;
+            },
+            checkSmallestDate(date) {
+                // Obter primeiro elemento
+                let tempDate = new Date(this.pedidos[0].data_mudanca)
+                for (let i = 1; i < this.pedidos.length; i++) {
+                    let curr = new Date(this.pedidos[i].data_mudanca)
+                    if (curr < tempDate) tempDate = curr
+                }
+                this.max_date = tempDate
+                if ((this.max_date < new Date(this.data)) || this.data.localeCompare('') === 0) {
+                    this.data = date
+                    this.old_date = date
+                }
+            },
+            checkDateChange() {
+                let currData = new Date(this.data)
+                // If max_date is not defined yet, return
+                if (this.max_date === '') return
+                if (currData > this.max_date) {
+                    this.data = this.old_date
+                } else {
+                    this.old_date = this.data
+                }
+            }
+
+        },
+    })
+</script>
+
+{% endblock content %}

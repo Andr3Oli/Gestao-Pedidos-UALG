@@ -1,0 +1,109 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="has-text-centered">
+    <div id="table">
+        <div v-if="isDoneFetching">
+            <div class="block">
+                <h1 style="text-align: center; font-weight: bold; font-size: larger;">Consultar Pedido Outros</h1>
+                <label class="label">Assunto</label>
+                <input disabled name="assunto" :value=[[pedido_principal.assunto]]>
+                <label class="label">Descrição</label>
+                <textarea disabled name="descricao" :value=[[pedido_principal.descricao]]></textarea>
+                <label class="label">Data Alvo</label>
+                <input disabled type="date" name="descricao" :value=[[pedido_principal.dataalvo]]>
+            </div>
+            <br>
+
+            <div class="block columns is-centered" v-if="pedidos != 0">
+                <div class="column">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width:10%">Assunto</th>
+                                <th style="width:10%">Descrição</th>
+                                <th style="width:10%">Data alvo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="i in n" :key="i">
+                                <td>
+                                    <input disabled type="hidden" :name="'pedidodinho' + i"
+                                        :value="[[pedidos[i-1].id]]">
+                                    <label>
+                                        <input :name="'assunto' + i" :value=[[pedidos[i-1].assunto_pedido]] disabled>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="">
+                                        <label>
+                                            <textarea disabled :name="'descricao' + i"
+                                                :value=[[pedidos[i-1].descricao_pedido]]></textarea>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <label>
+                                        <input disabled type="date" :name="'date' + i"
+                                            :value=[[pedidos[i-1].dataalvo_pedido]]>
+                                    </label>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if pendente %}
+    <a href="{% url 'requestmanager:edit_pedidooutro' id %}" class="button is-primary">Editar</a>
+    <a href="{% url 'requestmanager:delete_pedido' id %}" class="button is-danger">Eliminar</a>
+    {% endif %}
+    <input class="button is-primary" type=button value="Voltar" onClick="javascript:history.go(-1);">
+
+</div>
+
+<script>
+    var app = new Vue({
+
+        delimiters: ["[[", "]]"],
+        el: '#table',
+        data() {
+            return {
+                pedido_principal: {},
+                pedidos: [],
+                n: 2,
+                isDoneFetching: false
+            }
+        },
+        async created() {
+            await this.fetchData();
+            this.isDoneFetching = true;
+        },
+        methods: {
+            async fetchData() {
+                pathname = window.location.pathname.split('/')
+                id = pathname[pathname.length - 1]
+                this.pedidos = await axios.get('http://127.0.0.1:8000/api/pedido_outro/' + id)
+                this.pedidos = this.pedidos.data
+                this.pedido_principal = await axios.get('http://127.0.0.1:8000/api/pedido/' + id)
+                this.pedido_principal = this.pedido_principal.data
+                this.n = this.pedidos.length
+            },
+
+            addLine() {
+                this.n++
+                //this.indexes.push(this.n)
+            },
+            removeLine(i) {
+                //this.indexes = this.indexes.filter((x) => x != i);
+                this.n--;
+            },
+
+        },
+    })
+</script>
+
+{% endblock content %}

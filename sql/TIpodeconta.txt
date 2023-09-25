@@ -1,0 +1,2 @@
+INSERT INTO Tipocontas VALUES ('Docente');
+INSERT INTO Tipocontas VALUES ('Funcionario');

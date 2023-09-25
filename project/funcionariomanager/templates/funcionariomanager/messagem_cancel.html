@@ -1,0 +1,13 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+    <form class="has-text-centered" method="post" id="form">
+      {% csrf_token %}
+      <h1 style="text-align: center; font-weight: bold; font-size: larger;">Email para PCP</h1>
+      <label class="label"> Descreva o motivo de cancelamento</label>
+      {{form.messagem}}
+      <input class="button is-primary" type="submit" value="Enviar">
+      <input class="button is-primary" type=button value="Voltar" onClick="javascript:history.go(-1);">
+    </form>
+{% endblock content%}

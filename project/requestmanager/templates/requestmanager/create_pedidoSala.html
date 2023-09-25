@@ -1,0 +1,203 @@
+{% extends 'requestmanager/layout.html' %}
+{% load static %}
+
+{% block content %}
+    <div id="table">
+        <form class="has-text-centered" method="post" id="form">
+            {% csrf_token %}
+            <h1 style="text-align: center; font-weight: bold; font-size: larger;">Criar Pedido de Sala</h1>
+            <label class="label">Assunto</label>
+            <input name="assunto" value="{{ old_data.assunto }}" class="block input" required>
+{#            {{ pedidoSalaForm.assunto }}#}
+            <label class="label">Descrição</label>
+            <textarea name="descricao" class="block textarea" required>{{ old_data.descricao }}</textarea>
+{#            {{ pedidoSalaForm.descricao }}#}
+            <label class="label">Data Alvo</label>
+            <input type="date" name="data" v-model="data" @change="checkDateChange" min="{{ min_date }}" max="{{ max_date }}" required>
+            <br><br>
+            <div id="table" class="block columns is-centered">
+                <div class="column">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width:10%">Ação</th>
+                            <th style="width:10%">Lotação</th>
+                            <th style="width:10%">Data</th>
+                            <th style="width:10%">Hora de Inicio</th>
+                            <th style="width:10%">Hora de Fim</th>
+                            <th style="width:10%">Ocasião</th>
+                            <th style="width:10%">Tipo de sala</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(value, i) in pedidos" :key="i">
+                            <td>
+                                <div class="select">
+                                    <select :name="'acao' + i" v-model="value.acao" required>
+                                        <option v-for="(option, index) in acao" :key="index" :value=option.id> [[
+                                            option.nome ]]
+                                        </option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="number" :name="'lotacao' + i" min="1" max="475" value="30"
+                                       v-model="value.alunosprevistos" required></input>
+                            </td>
+                            <td>
+                                <input type="date" :name="'data' + i" v-model="value.data"
+                                       @change="checkSmallestDate(value.data)" min="{{ min_date }}" max="{{ max_date }}" required> </input>
+                            </td>
+                            <td>
+                                <input type="time" :name="'horainicio' + i" v-model="value.horainicio" required></input>
+                            </td>
+                            <td>
+                                <input type="time" :name="'horafim' + i" v-model="value.horafim" required></input>
+                            </td>
+                            <td>
+                                <div class="select">
+                                    <select :name="'tipos' + i" v-model="value.tipopedidosalaid" required>
+                                        <option v-for="(option, index) in tipos" :key="index" :value=option.id> [[
+                                            option.nome ]]
+                                        </option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="select">
+                                    <select :name="'tiposala' + i" v-model="value.categoriasalaid" required>
+                                        <option v-for="(option, index) in tiposala" :key="index" :value=option.id> [[
+                                            option.nome ]]
+                                        </option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <b-button rounded type="s-info is-light" size="is-small" @click="removeLine(i)">
+                                    <span class="icon">
+                                        <i class="fas fa-lg fa-solid fa-trash"></i>
+                                    </span>
+                                </b-button>
+                            </td>
+                        </tr>
+                        <td>
+                            <div style="float: left;">
+                                <input type="button" class="button" style=" margin-right: 10px; padding: 5px"
+                                       value="Adicionar Linha" @click="addLine()">
+                            </div>
+                        </td>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="block">
+                <input class="button is-primary" type="submit" value="Submeter">
+                <input class="button is-danger" type=button value="Cancelar" onClick="javascript:history.go(-1);"></div>
+            </div>
+        </form>
+    </div>
+    <script>
+        var app = new Vue({
+                delimiters: ["[[", "]]"],
+                el: '#table',
+                data() {
+                    return {
+                        acao: [],
+                        tipos: [],
+                        pedidos: [],
+                        unidade: [],
+                        tiposala: [],
+                        n: 1,
+                        data: '',
+                        old_date: '',
+                        max_date: ''
+                    }
+                },
+                async created() {
+                    await this.fetchData();
+                    this.pedidos.push({
+                        id: '',
+                        acao: '',
+                        alunosprevistos: '',
+                        data: '',
+                        horainicio: '',
+                        horafim: '',
+                        unidadecurricularid: '',
+                        categoriasalaid: '',
+
+                    })
+                },
+                methods: {
+                    async fetchData() {
+                        this.unidade = await axios.get('http://127.0.0.1:8000/api/uc_unidadecurricular/' + 3)
+                        this.unidade = this.unidade.data
+                        this.tiposala = await axios.get('http://127.0.0.1:8000/api/categoriaSala/')
+                        this.tiposala = this.tiposala.data
+                        this.acao = await axios.get('http://127.0.0.1:8000/api/acao/')
+                        this.acao = this.acao.data
+                        this.tipos = await axios.get('http://127.0.0.1:8000/api/tipopedidosala')
+                        this.tipos = this.tipos.data
+                    },
+                    async created() {
+                        await this.fetchData();
+                        this.pedidos.push({
+                            id: '',
+                            acao: '',
+                            alunosprevistos: '',
+                            data: '',
+                            horainicio: '',
+                            horafim: '',
+                            unidadecurricularid: '',
+                            categoriasalaid: '',
+                        })
+                    },
+                    addLine() {
+                        this.n++
+                        this.pedidos.push({
+                            id: '',
+                            alunosprevistos: '',
+                            data: '',
+                            horainicio: '',
+                            horafim: '',
+                            unidadecurricularid: '',
+                            categoriasalaid: '',
+                        })
+                        //this.indexes.push(this.n)
+                    },
+                    removeLine(i) {
+                        //this.pedidos = this.pedidos.filter((x) => x != i);
+                        this.$delete(this.pedidos, i)
+                        console.log(i)
+                        console.log(this.pedidos)
+                        this.n--;
+                    },
+                    checkSmallestDate(date) {
+                        // Obter primeiro elemento
+                        let tempDate = new Date(this.pedidos[0].data)
+                        for (let i = 1; i < this.pedidos.length; i++) {
+                            let curr = new Date(this.pedidos[i].data)
+                            if (curr < tempDate) tempDate = curr
+                        }
+                        this.max_date = tempDate
+                        if ((this.max_date < new Date(this.data)) || this.data.localeCompare('') === 0) {
+                            this.data = date
+                            this.old_date = date
+                        }
+                    },
+                    checkDateChange() {
+                        let currData = new Date(this.data)
+                        // If max_date is not defined yet, return
+                        if (this.max_date === '') return
+                        if (currData > this.max_date) {
+                            this.data = this.old_date
+                        } else {
+                            this.old_date = this.data
+                        }
+                    }
+                }
+            }
+        )
+    </script>
+
+{% endblock content %}

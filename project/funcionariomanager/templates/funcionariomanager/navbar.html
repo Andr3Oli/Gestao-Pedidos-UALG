@@ -1,0 +1,84 @@
+{% load static %}
+{% load auth_extras %}
+<nav id="main-navbar" class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        {% if user.is_authenticated %}
+            <a class="navbar-item logo" href="{% url 'funcionariomanager:app_render' user.id %}">
+                <img src="{% static 'img/logo-navbar.png' %}" alt="UALG">
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="navbar-menu">
+        <div class="navbar-start">
+            {% if user.is_authenticated and user|has_group:"ProfessorUniversitario" %}
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Pedidos</a>
+                    <div class="navbar-dropdown">
+                        <a href="{% url 'requestmanager:list_outros' %}" class="navbar-item">Pedidos Outros</a>
+                        <a href="{% url 'requestmanager:list_horario' %}" class="navbar-item">Pedido Horário</a>
+                        <a href="{% url 'requestmanager:list_salas' %}" class="navbar-item">Pedido Sala</a>
+                        <a href="{% url 'requestmanager:list_unidadeCurricular' %}" class="navbar-item">Pedido Unidade
+                            Curricular</a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if user.is_authenticated and user|has_group:"Funcionario" %}
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Import/Export</a>
+                    <div class="navbar-dropdown">
+                        <a href="{% url 'datamanager:export_pedidos_xls' %}" class="navbar-item">Export Pedidos</a>
+                        <a href="{% url 'datamanager:import_RUC' %}" class="navbar-item">Import RUC</a>
+                        <a href="{% url 'datamanager:import_DSD' %}" class="navbar-item">Import DSD</a>
+                        <a href="{% url 'datamanager:import_salas' %}" class="navbar-item">Import Salas</a>
+                        <a href="{% url 'datamanager:import_DOCENTE' %}" class="navbar-item">Import DOCENTE</a>
+                    </div>
+                </div>
+
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Funcionários</a>
+                    <div class="navbar-dropdown">
+                        {% comment %} <a href="{% url 'funcionariomanager:emailPCP' %}" class="navbar-item">Contactar PCP</a> {% endcomment %}
+                        <a href="{% url 'funcionariomanager:create_anoletivo' %}" class="navbar-item">Criar Ano
+                            Letivo</a>
+                        <a href="{% url 'funcionariomanager:list_anoletivo' %}" class="navbar-item">Listar Anos
+                            Letivos</a>
+                    </div>
+                </div>
+
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Estatisticas</a>
+                    <div class="navbar-dropdown">
+                        <a href="{% url 'statmanager:funcionarios_stats' %}" class="navbar-item"> Estatisticas de funcionarios </a>
+                        <a href="{% url 'statmanager:chart_pedidos' %}" class="navbar-item"> Estatisticas de pedidos </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+
+        <div class="navbar-end">
+            <div class="navbar-item">
+                {% if user.is_authenticated %}
+                    <a class="navbar-item">
+                        Hello {{ user.first_name }} {{ user.last_name }}
+                    </a>
+                {% else %}
+                    <a class="navbar-item" href="{% url 'authmanager:register_user' %}">
+                        Register
+                    </a>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <a class="navbar-item" href="{% url 'authmanager:logout' %}">
+                        Logout
+                    </a>
+                {% else %}
+                    <a class="navbar-item" href="{% url 'authmanager:login' %}">
+                        Login
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

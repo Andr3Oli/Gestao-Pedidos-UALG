@@ -1,0 +1,11 @@
+{% extends 'funcionariomanager/layout.html' %}
+{% block content %}
+<p style="text-align:center; font-size: larger;"><strong>{{ confirm_question }}</strong></p><br>
+<div class="center" style="text-align:center">
+  <form action="" method = "POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input class="button is-primary" type="submit" value="Sim">
+        <a href="{%url 'funcionariomanager:app_render' user.id%}" class="button is-primary">Não</a>
+  </form>
+</div>
+{% endblock content %}
